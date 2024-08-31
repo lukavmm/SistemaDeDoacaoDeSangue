@@ -3,6 +3,8 @@ import DashboardLayout from "../Pages/dashboard";
 import Page500 from "./.RealPages/auth/Page500";
 import SignIn from '../auth/SignIn';
 import async from "../Async";
+import SignUp from "../auth/SignUp";
+import Perfil from "../Pages/.RealPages/perfil/Perfil"
 
 // Layouts
 
@@ -23,6 +25,10 @@ const routes = [
       {
         path: "/home",
         element: <Page500 />
+      },
+      {
+        path: "/perfil",
+        element: <Perfil />
       }
     
     ],
@@ -35,10 +41,10 @@ const routes = [
         path: "sign-in",
         element: <SignIn />,
       },
-      // {
-      //   path: "sign-up",
-      //   element: <SignUp />,
-      // },
+      {
+        path: "sign-up",
+        element: <SignUp />,
+      },
       // {
       //   path: "404",
       //   element: <Page404 />,

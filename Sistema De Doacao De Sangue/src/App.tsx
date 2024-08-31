@@ -28,7 +28,7 @@ function App({ emotionCache = clientSideEmotionCache }) {
       <HelmetProvider>
         <Helmet
           titleTemplate="Doação de Sangue"
-          defaultTitle="Painel - Doador"
+          defaultTitle="Painel - Login"
         />
           {/* @ts-ignore */}
           <LocalizationProvider dateAdapter={AdapterDateFns}>

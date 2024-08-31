@@ -55,8 +55,9 @@ export const AuthProvider = ({ children } : { children: any}) => {
     
     const secretKey = "8)-i<!du:!x#|2lc+mm+(b13+?4$zua))~6w~jh!1b8?}f9jtp^6/b]$2!wi}9f"
 
-    const signIn = async (token: any , codUser:any, perm:any) => {
-        setToken(token); 
+    const signIn = async (token: any , codUser:any) => {
+        setToken(token);
+        console.log(token)
         if(token){
          // localStorage.setItem("user", JSON.stringify(codUser))
           setCodUser(codUser);
@@ -72,20 +73,13 @@ export const AuthProvider = ({ children } : { children: any}) => {
             secure: true, 
 
           })
-          setCookie(undefined,"crm-token",token,{
+          setCookie(undefined,"token",token,{
             maxAge: 60 * 60  * 4,// valido por 4 horas 
             path:'/',
             sameSite: 'None',
             secure: true, 
 
           })
-          setCookie(undefined, "permCookie", perm, {
-            maxAge: 864000, // 12 horas
-            path: "/",
-            sameSite: 'None',
-            secure: true,
-
-          });
         }
     };
     //data?.tokenAsync?.codPerm

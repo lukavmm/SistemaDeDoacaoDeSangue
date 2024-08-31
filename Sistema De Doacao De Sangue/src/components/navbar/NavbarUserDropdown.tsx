@@ -220,8 +220,9 @@ function NavbarUserDropdown() {
         onClose={closeMenu}
       >
         {/* Navegar para Perfil */}
-        {/* <MenuItem onClick={()=> navigate("/Perfil")}>Meu Perfil</MenuItem>  */}
+        <MenuItem onClick={()=> navigate("/Perfil")}>Meu Perfil</MenuItem> 
         <MenuItem onClick={handleSignOut}>Sair</MenuItem>
+        
       </Menu>
       <Drawer anchor="right" open={state.isOpen} onClose={toggleDrawer(false)}>
         <Demos />

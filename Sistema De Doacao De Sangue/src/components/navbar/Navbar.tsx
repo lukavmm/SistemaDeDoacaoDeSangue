@@ -10,7 +10,7 @@ import { getPermissoesFromCookie, hasPermission } from "../../utils/jwt";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Home as HomeIcon } from "@mui/icons-material";
-import Logo from "../vendor/logopn.png";
+import Logo from "../vendor/bloodIcon2.jpg";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NavbarUserDropdown from "../navbar/NavbarUserDropdown";
 import React from "react";

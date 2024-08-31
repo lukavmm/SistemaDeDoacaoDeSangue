@@ -18,7 +18,6 @@ import CircularLoading from "../Loading/Loading";
 import { Formik } from "formik";
 import LogoBranca from "/bloodIcon.png";
 import LogoPreta from "/bloodIcon.png";
-import { setCookie } from "nookies";
 import sideImage from "../vendor/loginIcon.jpg";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
@@ -36,6 +35,7 @@ export const LOGIN_MUTATION = gql`
     loginUsuario(dadosLogin: $dadosLogin) {
       token
       message
+      id
     }
   }
 `;
@@ -65,17 +65,18 @@ function SignIn() {
 
   useEffect(() => {
     if (data) {
+      console.log('Dados recebidos:', data);
       if (data?.loginUsuario?.message) {
-        setErrorOccurred(true);
+        setErrorOccurred(true);  // Caso haja uma mensagem de erro
       } else {
-        signIn(data?.loginUsuario.token, data?.loginUsuario.user.id);
+        // Autenticação bem-sucedida, prosseguir com o login
+        signIn(data?.loginUsuario.token, data?.loginUsuario.id);
       }
     }
   }, [data]);
 
   useEffect(() => {
     if (data?.loginUsuario) {
-      // Other logic if needed
     }
   }, [data]);
 
@@ -95,7 +96,10 @@ function SignIn() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         height: { xs: "auto", md: "100%", xl: "70%" },
-        width:"70%",
+        width:"60%",
+        padding: "auto",
+        marginX: "22%",
+        marginY: "6%",
         backgroundColor: selectedVariant?.palette.background.paper,
       }}
     >
@@ -126,8 +130,9 @@ function SignIn() {
           style={{
             borderRadius: "6px",
             width: "100%",
-            objectFit: "fill",
-            height: "75vh",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
           }}
         />
         {isMobile && (
@@ -152,18 +157,18 @@ function SignIn() {
           padding: "35px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          
         }}
       >
-        <Hidden smDown>{isDefaultTheme ? <Brand2 src={LogoPreta} /> : <Brand src={LogoBranca} />}</Hidden>
+        
         <Typography
           component="h1"
           variant="h4"
-          align="center"
+          align="left"
           marginBottom="5px"
-          sx={{ display: "flex", justifyContent: "center" }}
+          sx={{ display: "flex", justifyContent: "left", fontWeight: "400",fontSize: "1.75rem"}}
         >
-          Login
+          Entrar
         </Typography>
 
         <Formik
@@ -181,7 +186,7 @@ function SignIn() {
             try {
               setIsLoading(true);
 
-              await login({
+              const response = await login({
                 variables: {
                   dadosLogin:{
                     username: values.username,
@@ -195,7 +200,7 @@ function SignIn() {
                 setSubmitting(false);
                 setIsLoading(false);
               });
-
+              console.log('Resposta da mutação:', response);
               if (data?.loginUsuario?.token) {
                 signIn(data?.loginUsuario.token, data?.loginUsuario.user.id);
               }
@@ -229,6 +234,9 @@ function SignIn() {
                   {"Login inválido"}
                 </Alert>
               )}
+              <Typography>
+                Usuário
+              </Typography>
               <TextField
                 style={{ marginBottom: 5 }}
                 type="username"
@@ -242,6 +250,9 @@ function SignIn() {
                 onChange={handleChange}
                 my={2}
               />
+              <Typography>
+                Senha
+              </Typography>
               <TextField
                 type="password"
                 name="password"
@@ -254,6 +265,21 @@ function SignIn() {
                 onChange={handleChange}
                 my={2}
               />
+              <Grid container justifyContent="center">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  style={{
+                    backgroundColor: selectedVariant?.palette.button.main,
+                    width: "100%",
+                    marginTop: "10px"
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Entrar
+                </Button>
+              </Grid>
+              <Grid container justifyContent="space-between">
               <FormControlLabel
                 control={
                   <Checkbox
@@ -267,19 +293,17 @@ function SignIn() {
                 }
                 label="Lembre-se"
               />
-              <Grid container justifyContent="center">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  style={{
-                    backgroundColor: selectedVariant?.palette.button.main,
-                    width: 140,
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Entrar
-                </Button>
+              <Typography sx={{display: "flex", justifyContent: "flex-end",margin: "3%"}}>
+                Esqueci minha senha
+              </Typography>
               </Grid>
+              <Grid container justifyContent="center">
+                <Typography>
+                  Não possui conta?
+                  <Button type="button" onClick={() => navigate("/auth/sign-up")}>Registrar</Button>
+                </Typography>
+              </Grid>
+
               {(isLoading || loading) && (
                 <Modal
                   style={{
