@@ -1,4 +1,5 @@
 import * as Yup from "yup";
+
 import {
   Box,
   Button,
@@ -14,10 +15,12 @@ import {
 } from "@mui/material";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
+
 import CircularLoading from "../Loading/Loading";
 import { Formik } from "formik";
 import LogoBranca from "/bloodIcon.png";
 import LogoPreta from "/bloodIcon.png";
+import { setCookie } from "nookies";
 import sideImage from "../vendor/loginIcon.jpg";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
@@ -36,6 +39,7 @@ export const LOGIN_MUTATION = gql`
       token
       message
       id
+      tipo_usuario
     }
   }
 `;
@@ -70,13 +74,19 @@ function SignIn() {
         setErrorOccurred(true);  // Caso haja uma mensagem de erro
       } else {
         // Autenticação bem-sucedida, prosseguir com o login
-        signIn(data?.loginUsuario.token, data?.loginUsuario.id);
+        signIn(data?.loginUsuario.token, data?.loginUsuario.id, data?.loginUsuario.tipo_usuario);
       }
     }
   }, [data]);
 
   useEffect(() => {
     if (data?.loginUsuario) {
+      setCookie(undefined,"tipoUser",data?.loginUsuario.tipo_usuario,{
+        maxAge: 60 * 60 * 4,
+        path: '/',
+        sameSite: 'None',
+        secure: true, 
+      })
     }
   }, [data]);
 
@@ -202,7 +212,7 @@ function SignIn() {
               });
               console.log('Resposta da mutação:', response);
               if (data?.loginUsuario?.token) {
-                signIn(data?.loginUsuario.token, data?.loginUsuario.user.id);
+                signIn(data?.loginUsuario.token, data?.loginUsuario.user.id,data?.loginUsuario.tipo_usuario);
               }
             } catch (error: any) {
               console.log(JSON.stringify(error, null, 2));

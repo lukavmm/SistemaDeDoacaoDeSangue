@@ -19,7 +19,8 @@ export const AuthProvider = ({ children } : { children: any}) => {
 
     const [url, setUrl]     = useState('');
     const [token, setToken] = useState('');
-    const [codUser, setCodUser] = useState(null);
+    const [tipoUsuario, setTipoUsuario] = useState('');
+    const [codUser, setCodUser] = useState<string | null>(null);
     const [localToken, setLocalToken] = useLocalStorage("token", null);
 
     useEffect(() => {
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children } : { children: any}) => {
         ...headers,
         headers: {
           //authorization: token? `Bearer ${token}` : null,
-          authorization: cookies["crm-token"] ? `Bearer ${cookies["crm-token"]}` : "",
+          authorization: cookies["token"] ? `Bearer ${cookies["token"]}` : "",
         },
       }
     });
@@ -55,12 +56,12 @@ export const AuthProvider = ({ children } : { children: any}) => {
     
     const secretKey = "8)-i<!du:!x#|2lc+mm+(b13+?4$zua))~6w~jh!1b8?}f9jtp^6/b]$2!wi}9f"
 
-    const signIn = async (token: any , codUser:any) => {
+    const signIn = async (token: any , codUser:any, tipo_usuario: any) => {
         setToken(token);
-        console.log(token)
         if(token){
          // localStorage.setItem("user", JSON.stringify(codUser))
           setCodUser(codUser);
+          setTipoUsuario(tipo_usuario)
           navigate("/");
           setLocalToken(token)
           //criptografar o cookie codUser
@@ -71,28 +72,20 @@ export const AuthProvider = ({ children } : { children: any}) => {
             path: '/',
             sameSite: 'None',
             secure: true, 
-
           })
           setCookie(undefined,"token",token,{
             maxAge: 60 * 60  * 4,// valido por 4 horas 
             path:'/',
             sameSite: 'None',
             secure: true, 
-
           })
         }
     };
     //data?.tokenAsync?.codPerm
     const signOut = () => {
-      destroyCookie(undefined, "crm-token",{path: '/'});
+      destroyCookie(undefined, "token",{path: '/'});
       destroyCookie(undefined, "codUser",{path: '/'});
-      destroyCookie(null, "tutorialCampanhas", { path: "/" });
-      destroyCookie(null, "tutorialContaemail", { path: "/" });
-      destroyCookie(null, "tutorialContawpp", { path: "/" });
-      destroyCookie(null, "tutorialHome", { path: "/" });
-      destroyCookie(null, "tutorialTemplateemail", { path: "/" });
-      destroyCookie(null, "tutorialTemplatewpp", { path: "/" });
-      destroyCookie(null, "permCookie", { path: "/" });
+      destroyCookie(undefined, "tipoUser",{path: '/'});
       localStorage.removeItem("rememberedUsername");
       localStorage.removeItem("rememberedId");
         navigate("/auth/sign-in", { replace: true });
@@ -102,12 +95,13 @@ export const AuthProvider = ({ children } : { children: any}) => {
         () => ({
           token,
           codUser,
+          tipoUsuario,
           signIn,
           signOut,
           setUrl,
           url
         }),
-        [token,codUser]
+        [token,codUser,tipoUsuario]
     );
 
     return <AuthContext.Provider value={value}>

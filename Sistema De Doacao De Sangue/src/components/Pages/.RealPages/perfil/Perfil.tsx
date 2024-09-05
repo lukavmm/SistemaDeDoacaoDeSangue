@@ -1,13 +1,13 @@
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import { Box, Card, CardContent, Divider, Grid, IconButton, Typography } from "@mui/material";
 import { gql, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 
 import CircularLoading from "../../../../components/Loading/Loading"
-//import { ReactComponent as LogoPerfil } from "../../../vendor/IconePerfil.svg";
+import { FaUserEdit } from "react-icons/fa";
 import { decryptCookieValue } from '../../../../utils/jwt'
-import { parseCookies, setCookie } from "nookies";
+import { parseCookies } from "nookies";
 import { styled } from "@mui/system";
-import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const GET_PERFIL = gql`
   query getperfil($tipoUsuario: String!, $codUser: Int!) {
@@ -24,6 +24,8 @@ const GET_PERFIL = gql`
       cpf
       nomeHemocentro
       cpnj
+      dataAtualizacao
+      peso
     }
   }
 `;
@@ -34,30 +36,14 @@ const CustomCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-const ProfileImageContainer = styled('div')({
-  display: 'flex',
-  backgroundColor:"#26426F",
-  justifyContent: 'center',
-  width: 150,
-  height: 140,
-  marginTop: 15,
-  marginBottom: 5,
-  marginLeft: 10,
-  borderRadius: 5,
-});
-
 const Perfil = () => {
 
   const codUser = decryptCookieValue();
-  const setTipoUserCookie = (tipoUser: string) => {
-    setCookie(null, 'tipoUser', tipoUser, {
-      maxAge: 30 * 24 * 60 * 60, // 30 dias
-      path: '/', // Disponível em toda a aplicação
-    });
-  };
-  setTipoUserCookie('doador');
+
   const cookies = parseCookies();
   const tipoUsuario = cookies['tipoUser'];
+
+  const navigate = useNavigate()
 
   const [CarregarPerfil, { loading, error, data, refetch }] = useLazyQuery(GET_PERFIL);
 
@@ -73,6 +59,15 @@ const Perfil = () => {
     const [cpf, setcpf] = useState("")
     const [nomeHemocentro, setnomeHemocentro] = useState("")
     const [cnpj, setcnpj] = useState("")
+    const [peso, setPeso] = useState()
+    const [dataAtualizacao,setdataAtualizacao] = useState("");
+
+    const [elegibilidade, setElegibilidade] = useState<string>('indisponível');
+
+    // Use a função para atualizar a elegibilidade
+    useEffect(() => {
+      setElegibilidade(canDonate(peso, toDate(dataUltimaDoacao)));
+    }, [peso, dataUltimaDoacao]); // Atualiza quando peso ou dataUltimaDoacao mudarem
 
 useEffect(() => {
   if(data){
@@ -90,6 +85,8 @@ useEffect(() => {
     setcpf(perfil?.cpf || "Indisponível");
     setnomeHemocentro(perfil?.nomeHemocentro || "Indisponível");
     setcnpj(perfil?.cpnj || "Indisponível");
+    setdataAtualizacao(perfil?.dataAtualizacao || "Indisponível");
+    setPeso(perfil?.peso || "Indisponível");
   }
 }, [data])
 
@@ -105,6 +102,33 @@ useEffect(() => {
       });
     }
   }, [codUser, tipoUsuario]);
+
+  const canDonate = (peso: number | undefined, dataUltimaDoacao: Date | undefined): string => {
+    const intervaloMinimoDias = 60;
+    const pesoMinimo = 50; // Peso mínimo em kg
+  
+    if (peso === undefined || dataUltimaDoacao === undefined) {
+      return 'indisponível'; // Retornar mensagem padrão se algum valor for indefinido
+    }
+  
+    if (peso < pesoMinimo) {
+      return 'Não'; // Não apto a doar
+    }
+  
+    // Verificar se dataUltimaDoacao é um objeto Date
+    const dataUltimaDoacaoDate = dataUltimaDoacao instanceof Date
+      ? dataUltimaDoacao
+      : new Date(dataUltimaDoacao); // Converte se não for um objeto Date
+  
+    if (isNaN(dataUltimaDoacaoDate.getTime())) {
+      return 'indisponível'; // Retornar mensagem padrão se a data for inválida
+    }
+  
+    const dataAtual = new Date();
+    const diferencaDias = Math.floor((dataAtual.getTime() - dataUltimaDoacaoDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+    return diferencaDias >= intervaloMinimoDias ? 'Sim' : 'Não';
+  };
 
   const formatDate = (isoDateString: any) => {
     if (!isoDateString) return ''; // Retorna uma string vazia se a data não for fornecida
@@ -148,21 +172,34 @@ useEffect(() => {
     }
     return value;
   }
+
+  const toDate = (date: string | Date): Date => {
+    if (typeof date === 'string') {
+      const parsedDate = new Date(date);
+      return isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+    }
+    return date instanceof Date ? date : new Date();
+  };
   
   
 
   return (
   <Grid container justifyContent="center" spacing={3}>
     <Grid item xs={12} textAlign="center">
-      <Typography fontSize={32} variant="h4">Perfil: {tipoUsuario}</Typography>
+      <Typography fontSize={32} variant="h4">Perfil</Typography>
     </Grid>
     <Grid item xs={8}>
       <CustomCard>
         <CardContent>
           {data && !loading ? (
             <>
-              <Typography ml={3} variant="h6" gutterBottom>Credenciais:</Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+                <Typography variant="h6" gutterBottom>Credenciais:</Typography>
+                <IconButton><FaUserEdit onClick={()=>{navigate('/perfil/editar')}} /></IconButton>
+              </Box>
+              <Divider />
               <Grid container spacing={2}>
+              <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style={{width:"13%",borderRadius: "50%",marginTop: "15px", padding: "10px"}}></img>
                 <Grid item>
                   <Grid container spacing={5} mt={0.1}>
                     <Grid item xs={10} sm={6}>
@@ -171,16 +208,25 @@ useEffect(() => {
                     </Grid>
                     <Grid item xs={10} sm={6}>
                       <Typography variant="subtitle1">Email</Typography>
-                      <Typography style={{padding: '6px',borderRadius: 4, fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{email|| "indisponivel"}</Typography>
+                      <Typography style={{width: tipoUsuario === 'hemocentro' ? '180px' : 'auto',padding: '6px',borderRadius: 4, fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{email|| "indisponivel"}</Typography>
+                    </Grid>
+                    {tipoUsuario === 'doador' && (
+                    <>
+                    <Grid item xs={10} sm={6}>
+                      <Typography variant="subtitle1">Peso</Typography>
+                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{peso|| "indisponivel"}</Typography>
                     </Grid>
                     <Grid item xs={10} sm={6}>
-                      <Typography variant="subtitle1">Tipo do Usuário</Typography>
-                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{tipoUsuario|| "indisponivel"}</Typography>
+                      <Typography variant="subtitle1">Elegível para doar</Typography>
+                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{peso !== undefined && dataUltimaDoacao !== undefined ? canDonate(peso, toDate(dataUltimaDoacao)) : "indisponível"}</Typography>
                     </Grid>
+                    </>
+            )}
                   </Grid>
                 </Grid>
               </Grid>
-              <Typography ml={3} mt={5} variant="h6" gutterBottom>Dados Pessoais:</Typography>
+              <Typography  mt={5} variant="h6" gutterBottom>Dados Pessoais:</Typography>
+              <Divider></Divider>
               {tipoUsuario == "doador" &&(
                 <>
                 <Grid container spacing={2}>
@@ -200,7 +246,7 @@ useEffect(() => {
                     </Grid>
                     <Grid item xs={10} sm={6}>
                       <Typography variant="subtitle1">Sexo</Typography>
-                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{sexo|| "indisponivel"}</Typography>
+                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{ sexo === 'M' ? "Masculino" : "Feminino" || "indisponivel"}</Typography>
                     </Grid>
                     <Grid item xs={10} sm={6}>
                       <Typography variant="subtitle1">Endereço</Typography>

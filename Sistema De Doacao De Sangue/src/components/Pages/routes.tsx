@@ -1,10 +1,11 @@
 import AuthLayout from "../layouts/Auth";
 import DashboardLayout from "../Pages/dashboard";
+import EditPerfil from "../Pages/.RealPages/perfil/EditPerfil"
 import Page500 from "./.RealPages/auth/Page500";
-import SignIn from '../auth/SignIn';
-import async from "../Async";
-import SignUp from "../auth/SignUp";
 import Perfil from "../Pages/.RealPages/perfil/Perfil"
+import SignIn from '../auth/SignIn';
+import SignUp from "../auth/SignUp";
+import async from "../Async";
 
 // Layouts
 
@@ -29,8 +30,11 @@ const routes = [
       {
         path: "/perfil",
         element: <Perfil />
+      },
+      {
+        path: "/perfil/editar",
+        element: <EditPerfil />
       }
-    
     ],
   },
   {
