@@ -73,7 +73,7 @@ function SignIn() {
       if (data?.loginUsuario?.message) {
         setErrorOccurred(true);  // Caso haja uma mensagem de erro
       } else {
-        // Autenticação bem-sucedida, prosseguir com o login
+        // Autenticação bem-sucedida, prosseguir com o login teste commit
         signIn(data?.loginUsuario.token, data?.loginUsuario.id, data?.loginUsuario.tipo_usuario);
       }
     }
