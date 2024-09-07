@@ -122,11 +122,7 @@ const IconButton = styled(MuiIconButton)`
         <Box px={4} my={3}>
           <Grid container spacing={3}>
             <Demo title="Escuro" themeVariant={THEMES.DARK} />
-            {/* <Demo title="Light" themeVariant={THEMES.LIGHT} /> */}
             <Demo title="Padrão" themeVariant={THEMES.DEFAULT} />
-            {/* <Demo title="Blue" themeVariant={THEMES.BLUE} />
-            <Demo title="Green" themeVariant={THEMES.GREEN} />
-            <Demo title="Indigo" themeVariant={THEMES.INDIGO} /> */}
           </Grid>
         </Box>
         <Box my={3} mx={4}>
@@ -135,7 +131,6 @@ const IconButton = styled(MuiIconButton)`
       
     );
   }
-  ////////////////////////////////////////////////////////////////////
   
   function NavbarTemas() {
     const [anchorMenu, setAnchorMenu] = React.useState<any>(null);

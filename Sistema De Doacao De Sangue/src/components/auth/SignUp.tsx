@@ -1,5 +1,7 @@
 import * as Yup from "yup";
+
 import {
+  AlertTitle,
   Autocomplete,
   Box,
   Button,
@@ -14,12 +16,20 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
+
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { BiDonateBlood } from "react-icons/bi";
 import CircularLoading from "../Loading/Loading";
+import { FaRegHospital } from "react-icons/fa";
 import { Formik } from "formik";
 import LogoBranca from "/bloodIcon.png";
 import LogoPreta from "/bloodIcon.png";
+import React from "react";
+import { ptBR } from "@mui/x-date-pickers/locales/ptBR";
+import ptLocale from "date-fns/locale/pt-BR";
 import sideImage from "../vendor/loginIcon.jpg";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
@@ -28,13 +38,6 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useNavigate } from "react-router-dom";
 import useTheme from "../hooks/useTheme";
 import variants from "../theme/variants";
-import { FaRegHospital } from "react-icons/fa";
-import { BiDonateBlood } from "react-icons/bi";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import ptLocale from "date-fns/locale/pt-BR";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { ptBR } from "@mui/x-date-pickers/locales/ptBR";
-import React from "react";
 
 const Alert = styled(MuiAlert)(spacing);
 const TextField = styled(MuiTextField)<{ my?: number }>(spacing);
@@ -62,9 +65,8 @@ function SignUp() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showMessage, setShowMessage] = useState("");
   const [severity, setSeverity] = React.useState<'success' | 'info' | 'warning' | 'error'>('success');
+  
   const [isCompleted, setIsCompleted] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [navigateToLogin, setNavigateToLogin] = useState(false);
 
   const [cnpj, setCnpj] = useState('');
 
@@ -98,13 +100,6 @@ const formatCNPJ = (value: any) => {
       localStorage.setItem("rememberedUsername", "");
     }
   }, []);
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-    if(navigateToLogin){
-      navigate('/auth/sign-in');
-     } 
-  };
 
   const Brand = styled.img`
     height: auto;
@@ -279,10 +274,10 @@ const formatCNPJ = (value: any) => {
                 // Sucesso
                 setShowMessage("Sucesso ao cadastrar!");
                 setSeverity("success");
-                setNavigateToLogin(true); // Define a navegação após sucesso
+                setShowMessageModal(true);
               } else {
                 // Erro
-                setShowMessage(response?.data.registrarUsuario?.error || 'Algo deu errado');
+                setShowMessage(response?.data.registrarUsuario?.error);
                 setSeverity("warning");
                 setShowMessageModal(true);
                 setIsCompleted(false);
@@ -295,12 +290,6 @@ const formatCNPJ = (value: any) => {
               setSeverity("error");
               setShowMessageModal(true);
               setIsCompleted(false);
-            } finally {
-              // Use setTimeout to ensure loading is set to false after the modal is displayed
-              setTimeout(() => {
-                setIsLoading(false);
-                setOpenSnackbar(true);
-              }, 300); // Adjust delay if necessary
             }
           }}
         >
@@ -586,26 +575,21 @@ const formatCNPJ = (value: any) => {
           )}
         </Formik>
       </Box>
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000} // Duração em milissegundos
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} // Posição no canto inferior esquerdo
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={severity}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            '& .MuiAlert-icon': {
-              marginRight: 1, // Espaço entre o ícone e a mensagem
-            },
-          }}
-        >
-          {showMessage}
-        </Alert>
-      </Snackbar>
+      {severity == 'success'  ?
+            <Snackbar open={showMessageModal} autoHideDuration={3000} onClose={() => navigate("/auth/sign-in")}>
+                <Alert  onClose={() => setShowMessageModal(false)} severity={severity == 'success'? 'success': 'error' } sx={{ width: '100%' }}>
+                    <AlertTitle>{severity == 'success'? `Sucesso` : `Erro` }</AlertTitle>
+                    {showMessage}
+                </Alert>
+            </Snackbar>
+            :
+            <Snackbar open={showMessageModal} autoHideDuration={5000} onClose={() => setShowMessageModal(false)}>
+                <Alert  onClose={() => setShowMessageModal(false)} severity={'warning'} sx={{ width: '100%' }}>
+                    <AlertTitle>Atenção ! </AlertTitle>
+                    {showMessage}
+                </Alert>
+            </Snackbar>
+            }
     </Box>
   );
 }

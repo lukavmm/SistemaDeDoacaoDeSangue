@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Card,
@@ -6,12 +8,13 @@ import {
   Divider,
   Grid,
   IconButton,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Navigate, useNavigate } from "react-router-dom";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -46,6 +49,16 @@ const GET_PERFIL = gql`
   }
 `;
 
+
+export const EDITAR_PERFIL = gql`
+mutation EditarPerfil($dadosPerfil: PerfilDTOInput!, $codUser: Int!, $tipoUsuario: String!) {
+  editarPerfil(dadosPerfil: $dadosPerfil, codUser: $codUser, tipoUsuario: $tipoUsuario) {
+    message
+    error
+  }
+}
+
+`;
 const CustomCard = styled(Card)(({ theme }) => ({
   borderColor: theme.palette.cardConfig.main,
   marginTop: theme.spacing(3),
@@ -63,6 +76,8 @@ const EditPerfil = () => {
   const [CarregarPerfil, { loading, error, data, refetch }] =
     useLazyQuery(GET_PERFIL);
 
+    const [getUpdatePerfil, {  }] = useMutation(EDITAR_PERFIL);
+        
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
@@ -80,6 +95,11 @@ const EditPerfil = () => {
 
   const [elegibilidade, setElegibilidade] = useState<string>("indisponível");
 
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showMessage, setShowMessage] = useState("");
+  const [severity, setSeverity] = React.useState<'success' | 'info' | 'warning' | 'error'>('success');
+
+  
   const [dataUltimaDoacaoAtualizada, setDataUltimaDoacaoAtualizada] =
     useState<Date | null>(null);
 
@@ -121,6 +141,51 @@ const EditPerfil = () => {
       });
     }
   }, [codUser, tipoUsuario]);
+
+  const handleUpdatePerfil = async () => {
+    try {
+      const dadosperfil ={
+        username: username,
+        email: email,
+        nomeCompleto: nomeCompleto,
+        dataNascimento: dataNascimento,
+        tipoSanguineo: tipoSanguineo,
+        sexo: sexo,
+        endereco: endereco,
+        telefone: telefone,
+        dataUltimaDoacao: dataUltimaDoacao,
+        cpf: cpf,
+        dataAtualizacao: dataAtualizacao,
+        peso: peso,
+        nomeHemocentro: nomeHemocentro,
+        cpnj: cnpj,
+      };
+      const response = await getUpdatePerfil({
+        variables: {
+          dadosPerfil: dadosperfil,
+          codUser: codUser,  // Substitua pelo ID correto do usuário
+          tipoUsuario: tipoUsuario  // Substitua pelo tipo correto do usuário
+        }
+      })  //.catch((error) =>{ console.log(JSON.stringify(error, null, 2))})
+      console.log(response)
+      if (response?.data.editarPerfil?.error === null) {
+        // Sucesso
+        setShowMessage("Sucesso ao editar dados do usuário!");
+        setSeverity("success");
+        setShowMessageModal(true);
+      } else {
+        // Erro
+        setShowMessage(response?.data.editarPerfil?.error);
+        setSeverity("warning");
+        setShowMessageModal(true);
+      }
+    } catch (e) {
+      const message = e || "Ocorreu algum erro :(";
+      setShowMessage("Erro ao editar dados!");
+      setSeverity("error");
+      setShowMessageModal(true);
+    }
+  };
 
   const handleDateChange = (date: Date | null) => {
     setDataUltimaDoacaoAtualizada(date);
@@ -468,6 +533,7 @@ const EditPerfil = () => {
                     justifyContent: "center",
                     alignItems: "center",
                   }}
+                  onClick={handleUpdatePerfil}
                 >
                   Salvar e aplicar
                 </Button>
@@ -482,10 +548,26 @@ const EditPerfil = () => {
                 <CircularLoading />
               </Grid>
             )}
+            {severity == 'success'  ?
+            <Snackbar open={showMessageModal} autoHideDuration={3000} onClose={() => navigate("/perfil")}>
+                <Alert  onClose={() => setShowMessageModal(false)} severity={severity == 'success'? 'success': 'error' } sx={{ width: '100%' }}>
+                    <AlertTitle>{severity == 'success'? `Sucesso` : `Erro` }</AlertTitle>
+                    {showMessage}
+                </Alert>
+            </Snackbar>
+            :
+            <Snackbar open={showMessageModal} autoHideDuration={5000} onClose={() => setShowMessageModal(false)}>
+                <Alert  onClose={() => setShowMessageModal(false)} severity={'warning'} sx={{ width: '100%' }}>
+                    <AlertTitle>Atenção ! </AlertTitle>
+                    {showMessage}
+                </Alert>
+            </Snackbar>
+            }
           </CardContent>
         </CustomCard>
       </Grid>
     </Grid>
+    
   );
 };
 

@@ -10,7 +10,8 @@ import { getPermissoesFromCookie, hasPermission } from "../../utils/jwt";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Home as HomeIcon } from "@mui/icons-material";
-import Logo from "../vendor/bloodIcon2.jpg";
+import Logo from "../vendor/LogoHeader.svg";
+import LogoPreta from "../vendor/LogoFooter.png";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NavbarUserDropdown from "../navbar/NavbarUserDropdown";
 import React from "react";
@@ -18,6 +19,7 @@ import styled from "@emotion/styled";
 import useTheme from "../hooks/useTheme";
 import variants from "../theme/variants";
 import { withTheme } from "@emotion/react";
+import MiniDrawer from "../Sidebar/MiniDrawer.";
 
 //import { useTranslation } from "react-i18next";
 
@@ -40,8 +42,8 @@ const HomeIcone = styled.img`
   margin-left: ${(props) => props.theme.spacing(12)};
   color: ${(props) => props.theme.sidebar.header.brand.color};
   fill: ${(props) => props.theme.sidebar.header.brand.color};
-  width: 80px;
-  height: 45px;
+  width: 60%;
+  height: 60%;
 `;
 
 const IconeCampanha = styled.img`
@@ -111,6 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({ onDrawerToggle }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const selectedVariant = variants.find((variant) => variant.name === theme);
+  const isDefaultTheme = theme === "DEFAULT";
   //const { t } = useTranslation();
   const location = useLocation();
 
@@ -132,27 +135,22 @@ const Navbar: React.FC<NavbarProps> = ({ onDrawerToggle }) => {
 
   return (
     <React.Fragment>
-      <AppBar
-        position="sticky"
-        elevation={0}
-        style={{ backgroundColor: selectedVariant?.header.background }}
-      >
+
         <Toolbar>
           <Grid container alignItems="center">
-            <Grid>
+            {/* <Grid>
               <HomeIcone
                 src={Logo}
                 onClick={() => navigate("/")}
                 style={{ cursor: "pointer" }}
               />
-            </Grid>
+            </Grid> */}
+            <MiniDrawer />
             <Grid item xs />
             <Grid item>
-              <NavbarUserDropdown />
             </Grid>
           </Grid>
         </Toolbar>
-      </AppBar>
 
     </React.Fragment>
   );

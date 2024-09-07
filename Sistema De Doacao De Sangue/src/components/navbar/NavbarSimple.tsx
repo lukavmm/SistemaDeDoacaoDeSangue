@@ -1,5 +1,6 @@
 import {
   Grid,
+  IconButton,
   AppBar as MuiAppBar,
   IconButton as MuiIconButton,
   Toolbar,
@@ -8,6 +9,7 @@ import {
 import React from "react";
 import styled from "@emotion/styled";
 import { withTheme } from "@emotion/react";
+import { Menu as MenuIcon } from "@mui/icons-material";
 
 const AppBar = styled(MuiAppBar)`
   background: ${(props) => props.theme.header.background};
@@ -25,14 +27,14 @@ const NavbarSimple: React.FC<NavbarProps> = ({ onDrawerToggle }) => {
         <Toolbar>
           <Grid container alignItems="center">
             <Grid item sx={{ display: { xs: "block", md: "none" } }}>
-              {/* <IconButton
+              <IconButton
                 color="inherit"
                 aria-label="Open drawer"
                 onClick={onDrawerToggle}
                 size="large"
               >
                 <MenuIcon />
-              </IconButton> */}
+              </IconButton>
             </Grid>
           </Grid>
         </Toolbar>

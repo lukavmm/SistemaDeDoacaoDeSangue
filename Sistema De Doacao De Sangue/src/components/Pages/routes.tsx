@@ -6,6 +6,7 @@ import Perfil from "../Pages/.RealPages/perfil/Perfil"
 import SignIn from '../auth/SignIn';
 import SignUp from "../auth/SignUp";
 import async from "../Async";
+import Hemocentros from "../Pages/.RealPages/hemocentros/Hemocentros"
 
 // Layouts
 
@@ -34,6 +35,10 @@ const routes = [
       {
         path: "/perfil/editar",
         element: <EditPerfil />
+      },
+      {
+        path: "/hemocentros",
+        element: <Hemocentros />
       }
     ],
   },
