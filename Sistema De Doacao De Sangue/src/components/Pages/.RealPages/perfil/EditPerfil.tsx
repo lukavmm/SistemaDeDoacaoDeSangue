@@ -27,6 +27,7 @@ import { parseISO } from "date-fns";
 import { ptBR } from "@mui/x-date-pickers/locales/ptBR";
 import ptLocale from "date-fns/locale/pt-BR";
 import { styled } from "@mui/system";
+import { formatCNPJ, formatCPF, formatDate, formatPhoneNumber } from "../../../../utils/functions";
 
 const GET_PERFIL = gql`
   query getperfil($tipoUsuario: String!, $codUser: Int!) {
@@ -225,54 +226,12 @@ const EditPerfil = () => {
     return diferencaDias >= intervaloMinimoDias ? "Sim" : "Não";
   };
 
-  const formatDate = (isoDateString: any) => {
-    if (!isoDateString) return ""; // Retorna uma string vazia se a data não for fornecida
-
-    const date = new Date(isoDateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Mês é zero-based
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${day}-${month}-${year}`;
-  };
-
-  function formatPhoneNumber(value: string): string {
-    if (!value) return "";
-    const cleaned = value.replace(/\D/g, "");
-    const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
-    if (match) {
-      return `(${match[1]}) ${match[2]}-${match[3]}`;
-    }
-    return value;
-  }
-
-  function formatCPF(value: string): string {
-    if (!value) return "";
-    const cleaned = value.replace(/\D/g, "");
-    const match = cleaned.match(/^(\d{3})(\d{3})(\d{3})(\d{2})$/);
-    if (match) {
-      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
-    }
-    return value;
-  }
 
   const handlePesoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numberValue = parseFloat(value);
     setPeso(isNaN(numberValue) ? undefined : numberValue);
   };
-
-  function formatCNPJ(value: string): string {
-    if (!value) return "";
-    // Remove all non-digit characters
-    const cleaned = value.replace(/\D/g, "");
-    // Match the cleaned input to the CNPJ format
-    const match = cleaned.match(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/);
-    if (match) {
-      return `${match[1]}.${match[2]}.${match[3]}/${match[4]}-${match[5]}`;
-    }
-    return value;
-  }
 
   const toDate = (date: string | Date): Date => {
     if (typeof date === "string") {

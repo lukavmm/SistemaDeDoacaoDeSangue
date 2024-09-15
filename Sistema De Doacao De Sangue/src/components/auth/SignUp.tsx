@@ -5,10 +5,7 @@ import {
   Autocomplete,
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
   Grid,
-  Hidden,
   Modal,
   Alert as MuiAlert,
   TextField as MuiTextField,
@@ -19,7 +16,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
-
+import { Autocomplete as AutocompleteGoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { BiDonateBlood } from "react-icons/bi";
 import CircularLoading from "../Loading/Loading";
@@ -33,11 +30,10 @@ import ptLocale from "date-fns/locale/pt-BR";
 import sideImage from "../vendor/loginIcon.jpg";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
-import useAuth from "../hooks/useAuth";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useNavigate } from "react-router-dom";
 import useTheme from "../hooks/useTheme";
 import variants from "../theme/variants";
+import { formatCNPJ } from "../../utils/functions";
 
 const Alert = styled(MuiAlert)(spacing);
 const TextField = styled(MuiTextField)<{ my?: number }>(spacing);
@@ -53,6 +49,10 @@ export const REGISTER_MUTATION = gql`
 
 function SignUp() {
   const navigate = useNavigate();
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyAoDKmLK4aTcHTTXU-xGp1JC2io7cbreMU",
+    libraries: ['places']
+  });
   const { theme } = useTheme();
   const selectedVariant = variants.find((variant) => variant.name === theme);
   //const { signIn, setUrl, url } = useAuth();
@@ -76,15 +76,6 @@ function SignUp() {
     setCnpj(formatCNPJ(value));
   };
   // Função para formatar CNPJ
-const formatCNPJ = (value: any) => {
-  return value
-    .replace(/\D/g, '') // Remove todos os caracteres não numéricos
-    .replace(/^(\d{2})(\d)/, '$1.$2') // Adiciona o ponto após os dois primeiros dígitos
-    .replace(/\.(\d{3})(\d)/, '.$1.$2') // Adiciona o ponto após os três dígitos seguintes
-    .replace(/\.(\d{3})(\d)/, '.$1/$2') // Adiciona a barra após os três dígitos seguintes
-    .replace(/(\d{4})(\d)/, '$1-$2') // Adiciona o hífen após os quatro últimos dígitos
-    .substring(0, 18); // Limita o comprimento
-};
 
   const opcoesSexo = [
     { label: "Masculino", id: 1, value: "M" },
@@ -433,19 +424,20 @@ const formatCNPJ = (value: any) => {
                   />
 
                   <Typography>Endereço</Typography>
-                  <TextField
-                    type="text"
-                    name="endereco"
-                    label="Endereço"
-                    value={values.endereco}
-                    error={Boolean(touched.endereco && errors.endereco)}
-                    fullWidth
-                    helperText={touched.endereco && errors.endereco}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    my={2}
-                  />
-
+                  <AutocompleteGoogleMap>
+                    <TextField
+                      type="text"
+                      name="endereco"
+                      label="Endereço"
+                      value={values.endereco}
+                      error={Boolean(touched.endereco && errors.endereco)}
+                      fullWidth
+                      helperText={touched.endereco && errors.endereco}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      my={2}
+                    />
+                  </AutocompleteGoogleMap>  
                   <Typography>Telefone</Typography>
                   <TextField
                     type="text"
@@ -492,19 +484,20 @@ const formatCNPJ = (value: any) => {
                   />
 
                   <Typography>Endereço</Typography>
-                  <TextField
-                    type="text"
-                    name="endereco"
-                    label="Endereço"
-                    value={values.endereco}
-                    error={Boolean(touched.endereco && errors.endereco)}
-                    fullWidth
-                    helperText={touched.endereco && errors.endereco}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    my={2}
-                  />
-
+                  <AutocompleteGoogleMap>
+                    <TextField
+                      type="text"
+                      name="endereco"
+                      label="Endereço"
+                      value={values.endereco}
+                      error={Boolean(touched.endereco && errors.endereco)}
+                      fullWidth
+                      helperText={touched.endereco && errors.endereco}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      my={2}
+                    />
+                  </AutocompleteGoogleMap>
                   <Typography>Telefone</Typography>
                   <TextField
                     type="text"
