@@ -205,7 +205,7 @@ useEffect(() => {
                     </Grid>
                     <Grid item xs={10} sm={6}>
                       <Typography variant="subtitle1">Sexo</Typography>
-                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{ sexo === 'M' ? "Masculino" : "Feminino" || "indisponivel"}</Typography>
+                      <Typography style={{ padding: '6px',borderRadius: 4,fontWeight: "bold",backgroundColor:localStorage.getItem("theme") === "\"DARK\"" ? "#26426F" : "#f1f1f1" }} variant="body1">{ sexo === 'M' ? "Masculino" : "Feminino"}</Typography>
                     </Grid>
                     <Grid item xs={10} sm={6}>
                       <Typography variant="subtitle1">Endereço</Typography>

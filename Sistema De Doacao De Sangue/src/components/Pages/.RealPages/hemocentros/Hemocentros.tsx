@@ -15,11 +15,17 @@ import {
 } from "@mui/material";
 import useTheme from "../../../hooks/useTheme";
 import variants from "../../../theme/variants";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
+import AgendamentoModal from "../../../Modal/AgendamentoModal";
 
 import { useJsApiLoader, GoogleMap, Marker } from "@react-google-maps/api";
-import { formatCNPJ, formatPhoneNumber } from "../../../../utils/functions";
+import {
+  formatCNPJ,
+  formatDate,
+  formatPhoneNumber,
+} from "../../../../utils/functions";
+import { decryptCookieValue } from "../../../../utils/jwt";
 
 const GET_HEMOCENTROS = gql`
   query {
@@ -34,6 +40,20 @@ const GET_HEMOCENTROS = gql`
   }
 `;
 
+const GET_DOADORES = gql`
+  query {
+    getDoadores {
+      id
+      nomeCompleto
+      tipoSanguineo
+      telefone
+      endereco
+      dataNascimento
+      dataUltimaDoacao
+    }
+  }
+`;
+
 interface Hemocentro {
   id: number;
   nomeHemocentro: string;
@@ -41,6 +61,16 @@ interface Hemocentro {
   telefone: string;
   emailContato: string;
   cnpj: string;
+}
+
+interface Doador {
+  id: number;
+  nomeCompleto: string;
+  tipoSanguineo: string;
+  telefone: string;
+  dataUltimaDoacao: string;
+  dataNascimento: string;
+  endereco: string;
 }
 
 const center = { lat: 48.8584, lng: 2.2945 };
@@ -56,13 +86,30 @@ function Hemocentros() {
 
   const [tipoPesquisa, setTipoPesquisa] = useState("hemocentros");
   const [hemocentros, setHemocentros] = useState<Hemocentro[]>([]);
+  const [doadores, setDoadores] = useState<Doador[]>([]);
+
+  const codUser = decryptCookieValue();
+
   const [hemocentroSelecionado, setHemocentroSelecionado] =
     useState<Hemocentro | null>(null); // Hemocentro selecionado para detalhes
-  const [open, setOpen] = useState(false); // Estado do modal
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null); // Coordenadas
 
-  const [CarregarHemocentros, { loading, error, data, refetch }] =
-    useLazyQuery(GET_HEMOCENTROS);
+  const [doadorSelecionado, setdoadorSelecionado] = useState<Doador | null>(
+    null
+  );
+
+  const [open, setOpen] = useState(false); // Estado do modal
+  const [showAgendamento, setShowAgendamento] = useState(false); // Estado do modal
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  ); // Coordenadas
+
+  const [
+    CarregarHemocentros,
+    { loading: loadingHemocentros, error: errorHemocentros },
+  ] = useLazyQuery(GET_HEMOCENTROS);
+
+  const [CarregarDoadores, { loading: loadingDoadores, error: errorDoadores }] =
+    useLazyQuery(GET_DOADORES);
 
   const handleOpenModal = (hemocentro: Hemocentro) => {
     setHemocentroSelecionado(hemocentro);
@@ -70,13 +117,19 @@ function Hemocentros() {
     setOpen(true);
   };
 
+  const handleOpenModalDoador = (doador: Doador) => {
+    setdoadorSelecionado(doador);
+    geocodeAddress(doador.endereco);
+    setOpen(true);
+  };
+
   const handleCloseModal = () => {
     setOpen(false);
     setHemocentroSelecionado(null);
+    setdoadorSelecionado(null);
   };
-
-   // Função para converter endereço em latitude e longitude
-   const geocodeAddress = (endereco: string) => {
+  // Função para converter endereço em latitude e longitude
+  const geocodeAddress = (endereco: string) => {
     const geocoder = new google.maps.Geocoder();
 
     geocoder.geocode({ address: endereco }, (results, status) => {
@@ -90,47 +143,33 @@ function Hemocentros() {
     });
   };
 
-  useEffect(() => {
-    // Preenchendo com dados fake
-    const hemocentrosFake: Hemocentro[] = [
-      {
-        id: 1,
-        nomeHemocentro: "Hemocentro Central",
-        endereco: "Avenida Brasil, 456, São Paulo, SP",
-        telefone: "(11) 1234-5678",
-        emailContato: "contato@hemocentrocentral.com.br",
-        cnpj: "12.345.678/0001-90",
-      },
-      {
-        id: 2,
-        nomeHemocentro: "Hemocentro Norte",
-        endereco: "Rua das Flores, 123, São Paulo, SP",
-        telefone: "(11) 9876-5432",
-        emailContato: "contato@hemocentronorte.com.br",
-        cnpj: "98.765.432/0001-10",
-      },
-    ];
-
-    // Definindo os dados fake no estado
-    setHemocentros(hemocentrosFake);
-  }, []);
-
   const handleTipoChange = (event: React.SyntheticEvent, newValue: string) => {
     setTipoPesquisa(newValue);
   };
 
   useEffect(() => {
-    CarregarHemocentros()
-      .then((response) => {
-        if (response.data) {
-          setHemocentros(response.data.hemocentros || []);
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao carregar hemocentros:", error);
-      });
-    console.log(data);
-  }, [CarregarHemocentros]);
+    if (tipoPesquisa === "hemocentros") {
+      CarregarHemocentros()
+        .then((response) => {
+          if (response.data) {
+            setHemocentros(response.data.hemocentros || []);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar hemocentros:", error);
+        });
+    } else if (tipoPesquisa === "doadores") {
+      CarregarDoadores()
+        .then((response) => {
+          if (response.data) {
+            setDoadores(response.data.getDoadores || []);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar doadores:", error);
+        });
+    }
+  }, [tipoPesquisa, CarregarHemocentros, CarregarDoadores]);
 
   return (
     <>
@@ -172,12 +211,73 @@ function Hemocentros() {
           borderRadius: "6px",
         }}
       >
-        {loading && <Typography>Carregando...</Typography>}
-        {error && <Typography>Erro ao carregar hemocentros.</Typography>}
-        {hemocentros.length > 0 ? (
-          hemocentros.map((hemocentro) => (
+        {tipoPesquisa === "hemocentros" ? (
+          loadingHemocentros ? (
+            <Typography>Carregando hemocentros...</Typography>
+          ) : errorHemocentros ? (
+            <Typography>Erro ao carregar hemocentros.</Typography>
+          ) : hemocentros.length > 0 ? (
+            hemocentros.map((hemocentro) => (
+              <Box
+                key={hemocentro.id}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  marginBottom: "16px",
+                  padding: "16px",
+                  width: "100%",
+                  borderRadius: "6px",
+                  backgroundColor: selectedVariant?.palette.background.paper,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Typography variant="h5">
+                    {hemocentro.nomeHemocentro}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleOpenModal(hemocentro)}
+                  >
+                    Ver detalhes
+                  </Button>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    marginTop: "8px",
+                    width: "100%",
+                  }}
+                >
+                  <Typography mb={1} sx={{ color: "lightgrey" }}>
+                    {hemocentro.endereco}
+                  </Typography>
+                  <Typography mb={1} sx={{ color: "lightgrey" }}>
+                    {formatPhoneNumber(hemocentro.telefone)}
+                  </Typography>
+                </Box>
+              </Box>
+            ))
+          ) : (
+            <Typography>Nenhum hemocentro encontrado.</Typography>
+          )
+        ) : loadingDoadores ? (
+          <Typography>Carregando doadores...</Typography>
+        ) : errorDoadores ? (
+          <Typography>Erro ao carregar doadores.</Typography>
+        ) : doadores.length > 0 ? (
+          doadores.map((doador) => (
             <Box
-              key={hemocentro.id}
+              key={doador.id}
               sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -197,46 +297,43 @@ function Hemocentros() {
                   width: "100%",
                 }}
               >
-                <Typography variant="h5">
-                  {hemocentro.nomeHemocentro}
-                </Typography>
+                <Typography variant="h5">{doador.nomeCompleto}</Typography>
                 <Button
                   variant="contained"
-                  onClick={() => handleOpenModal(hemocentro)}
+                  onClick={() => handleOpenModalDoador(doador)}
                 >
                   Ver detalhes
                 </Button>
               </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  marginTop: "8px",
-                  width: "100%",
-                }}
-              >
-                <Typography mb={1} sx={{ color: "lightgrey" }}>
-                  {hemocentro.endereco}
-                </Typography>
-                <Typography mb={1} sx={{ color: "lightgrey" }}>
-                  {formatPhoneNumber(hemocentro.telefone)}
-                </Typography>
-              </Box>
+              <Typography mb={1} sx={{ color: "lightgrey" }}>
+                Tipo Sanguíneo: {doador.tipoSanguineo}
+              </Typography>
+              <Typography mb={1} sx={{ color: "lightgrey" }}>
+                Telefone: {formatPhoneNumber(doador.telefone)}
+              </Typography>
+              <Typography mb={1} sx={{ color: "lightgrey" }}>
+                Data da última doação: {formatDate(doador.dataUltimaDoacao)}
+              </Typography>
             </Box>
-            
           ))
         ) : (
-          <Typography>Nenhum hemocentro encontrado.</Typography>
+          <Typography>Nenhum doador encontrado.</Typography>
         )}
       </Box>
-      {/* Modal de Detalhes */}
+
+      <AgendamentoModal open={showAgendamento} onClose={()=>{setShowAgendamento(false)}} codUser={codUser} codHemocentro={hemocentroSelecionado?.id} />
+
       <Dialog open={open} onClose={handleCloseModal} fullWidth maxWidth="md">
-        <DialogTitle sx={{fontSize: 24}}>Detalhes do Hemocentro</DialogTitle>
+        <DialogTitle sx={{ fontSize: 24 }}>
+          {hemocentroSelecionado
+            ? "Detalhes do Hemocentro"
+            : "Detalhes do Doador"}
+        </DialogTitle>
         <DialogContent>
-          {hemocentroSelecionado && (
-            <Box sx={{ display:"flex"}}>
-              <Box sx={{ width: "50%"}}>
+          {hemocentroSelecionado ? (
+            // Exibe detalhes do hemocentro
+            <Box sx={{ display: "flex" }}>
+              <Box sx={{ width: "50%" }}>
                 <Typography variant="h6">
                   {hemocentroSelecionado.nomeHemocentro}
                 </Typography>
@@ -249,10 +346,12 @@ function Hemocentros() {
                 <Typography>
                   Email: {hemocentroSelecionado.emailContato}
                 </Typography>
-                <Typography>CNPJ: {formatCNPJ(hemocentroSelecionado.cnpj)}</Typography>
+                <Typography>
+                  CNPJ: {formatCNPJ(hemocentroSelecionado.cnpj)}
+                </Typography>
               </Box>
               <Box>
-              <GoogleMap
+                <GoogleMap
                   center={coords ?? { lat: 48.8584, lng: 2.2945 }}
                   zoom={15}
                   mapContainerStyle={{ width: "500px", height: "500px" }}
@@ -261,9 +360,45 @@ function Hemocentros() {
                 </GoogleMap>
               </Box>
             </Box>
+          ) : doadorSelecionado ? (
+            // Exibe detalhes do doador
+            <Box sx={{ display: "flex" }}>
+              <Box sx={{ width: "50%" }}>
+                <Typography variant="h6">
+                  {doadorSelecionado.nomeCompleto}
+                </Typography>
+                <Typography>
+                  Tipo Sanguíneo: {doadorSelecionado.tipoSanguineo}
+                </Typography>
+                <Typography>
+                  Telefone: {formatPhoneNumber(doadorSelecionado.telefone)}
+                </Typography>
+                <Typography>Endereço: {doadorSelecionado.endereco}</Typography>
+                <Typography>
+                  Data de Nascimento:{" "}
+                  {formatDate(doadorSelecionado.dataNascimento)}
+                </Typography>
+                <Typography>
+                  Data da última doação:{" "}
+                  {formatDate(doadorSelecionado.dataUltimaDoacao)}
+                </Typography>
+              </Box>
+              <Box>
+                <GoogleMap
+                  center={coords ?? { lat: 48.8584, lng: 2.2945 }}
+                  zoom={15}
+                  mapContainerStyle={{ width: "500px", height: "500px" }}
+                >
+                  <Marker position={coords ?? { lat: 48.8584, lng: 2.2945 }} />
+                </GoogleMap>
+              </Box>
+            </Box>
+          ) : (
+            <Typography>Nenhum item selecionado.</Typography>
           )}
         </DialogContent>
         <DialogActions>
+          <Button variant="contained" color="primary" onClick={()=> {setShowAgendamento(true)}}>Agendar</Button>
           <Button onClick={handleCloseModal}>Fechar</Button>
         </DialogActions>
       </Dialog>
