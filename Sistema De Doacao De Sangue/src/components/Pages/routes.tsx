@@ -7,6 +7,7 @@ import SignIn from '../auth/SignIn';
 import SignUp from "../auth/SignUp";
 import async from "../Async";
 import Hemocentros from "../Pages/.RealPages/hemocentros/Hemocentros"
+import Agendamentos from "../Pages/.RealPages/agendamentos/Agendamentos"
 
 // Layouts
 
@@ -39,6 +40,10 @@ const routes = [
       {
         path: "/hemocentros",
         element: <Hemocentros />
+      },
+      {
+        path: "/agendamentos",
+        element: <Agendamentos />
       }
     ],
   },

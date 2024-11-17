@@ -27,7 +27,7 @@ import LogoPreta from "/bloodIcon.png";
 import React from "react";
 import { ptBR } from "@mui/x-date-pickers/locales/ptBR";
 import ptLocale from "date-fns/locale/pt-BR";
-import sideImage from "../vendor/loginIcon.jpg";
+import sideImage from "../vendor/DoacaoDeSangue.png";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
@@ -105,7 +105,7 @@ function SignUp() {
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         height: { xs: "auto", md: "100%", xl: "70%" },
-        width: "60%",
+        width: "50%",
         justifyContent: tipoCadastro === "" ? "" : "center",
         padding: "auto",
         marginX: "22%",
@@ -142,6 +142,7 @@ function SignUp() {
             display: tipoCadastro === "" ? "block" : "none",
             borderRadius: "6px",
             width: "100%",
+            height: "100%",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center center",
@@ -361,7 +362,7 @@ function SignUp() {
                   >
                     <DatePicker
                       sx={{ width: "100%" }}
-                      label="Selecione a Data de Início"
+                      label="Selecione a Data de Nascimento"
                       value={values.dataNascimento}
                       slotProps={{ textField: { size: "medium" } }}
                       onChange={(date: any) => {
@@ -381,7 +382,7 @@ function SignUp() {
                   >
                     <DatePicker
                       sx={{ width: "100%" }}
-                      label="Selecione a Data de Início"
+                      label="Selecione a Data da última doação"
                       value={values.dataUltimaDoacao}
                       slotProps={{ textField: { size: "medium" } }}
                       onChange={(date: any) => {

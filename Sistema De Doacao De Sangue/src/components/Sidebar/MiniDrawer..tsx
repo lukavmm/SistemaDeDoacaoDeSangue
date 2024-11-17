@@ -21,11 +21,16 @@ import styledEmotion from "@emotion/styled";
 import { useState } from "react";
 import NavbarUserDropdown from "../navbar/NavbarUserDropdown";
 import Logo from "../vendor/LogoHeader.svg";
-import { Grid } from "@mui/material";
+import { Grid, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 import { GiHospitalCross } from "react-icons/gi";
 import { MdBloodtype } from "react-icons/md";
+import { GrScheduleNew } from "react-icons/gr";
+import { CalendarToday } from "@mui/icons-material";
+import { MdOutlineManageAccounts } from "react-icons/md";
+import { CgLogOff } from "react-icons/cg";
+import useAuth from "../hooks/useAuth";
 
 let drawerWidth = 240;
 
@@ -140,6 +145,13 @@ export default function MiniDrawer() {
     setOpen(false);
   };
 
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth/sign-in");
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -183,19 +195,19 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Doações", "Doadores", "Send email", "Drafts"].map(
-            (text, index) => (
-              <ListItem key={text} disablePadding sx={{ display: "block" }}>
+        {[
+            { text: "Doações", icon: <GiHospitalCross size={24} />, route: "/hemocentros", state: { tipoPesquisa: "hemocentros" } },
+            { text: "Doadores", icon: <MdBloodtype size={24} />, route: "/hemocentros", state: { tipoPesquisa: "doadores" } },
+            { text: "Agendamentos", icon: <CalendarToday />, route: "/agendamentos" },
+          ].map((text, index) => (
+              <Tooltip title={text.text} placement="right" arrow disableHoverListener={open}>
+              <ListItem key={text.text} disablePadding sx={{ display: "block" }}>
                 <ListItemButton
                   onClick={() => {
-                    if (index === 0) {
-                      navigate("/hemocentros");
-                    } else if (index === 1) {
-                      navigate("/doadores");
-                    } else if (index === 2) {
-                      navigate("/send-email");
-                    } else if (index === 3) {
-                      navigate("/drafts");
+                    if(text.state){
+                      navigate(text.route, {state: text.state});
+                    } else {
+                      navigate(text.route)
                     }
                   }}
                   sx={[
@@ -227,21 +239,10 @@ export default function MiniDrawer() {
                           },
                     ]}
                   >
-                    {index === 0 ? (
-                      <GiHospitalCross
-                        size={24}
-                        onClick={() => {
-                          navigate("/hemocentros");
-                        }}
-                      />
-                    ) : index === 1 ? (
-                      <MdBloodtype size={24} />
-                    ) : (
-                      <MailIcon />
-                    )}
+                   {text.icon}
                   </ListItemIcon>
                   <ListItemText
-                    primary={text}
+                    primary={text.text}
                     sx={[
                       open
                         ? {
@@ -254,60 +255,74 @@ export default function MiniDrawer() {
                   />
                 </ListItemButton>
               </ListItem>
+              </Tooltip>
             )
           )}
         </List>
         <Divider />
         <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: "initial",
-                      }
-                    : {
-                        justifyContent: "center",
-                      },
-                ]}
-              >
-                <ListItemIcon
+        {[
+            { text: "Meu Perfil", icon: <MdOutlineManageAccounts size={24}/>, route: "/Perfil" },
+            { text: "Sair", icon: <CgLogOff size={24}/>, onclick: handleSignOut },
+          ].map((text, index) => (
+              <Tooltip title={text.text} placement="right" arrow disableHoverListener={open}>
+              <ListItem key={text.text} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  onClick={() => {
+                    if (text.onclick) {
+                      text.onclick(); // Executa a função handleSignOut
+                    } else if (text.route) {
+                      navigate(text.route); // Navega para a rota especificada
+                    }
+                  }}
                   sx={[
                     {
-                      minWidth: 0,
-                      justifyContent: "center",
+                      minHeight: 48,
+                      px: 2.5,
                     },
                     open
                       ? {
-                          mr: 3,
+                          justifyContent: "initial",
                         }
                       : {
-                          mr: "auto",
+                          justifyContent: "center",
                         },
                   ]}
                 >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
-                  sx={[
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  <ListItemIcon
+                    sx={[
+                      {
+                        minWidth: 0,
+                        justifyContent: "center",
+                      },
+                      open
+                        ? {
+                            mr: 3,
+                          }
+                        : {
+                            mr: "auto",
+                          },
+                    ]}
+                  >
+                   {text.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={text.text}
+                    sx={[
+                      open
+                        ? {
+                            opacity: 1,
+                          }
+                        : {
+                            opacity: 0,
+                          },
+                    ]}
+                  />
+                </ListItemButton>
+              </ListItem>
+              </Tooltip>
+            )
+          )}
         </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

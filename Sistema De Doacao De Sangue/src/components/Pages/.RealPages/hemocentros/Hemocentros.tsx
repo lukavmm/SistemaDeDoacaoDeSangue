@@ -18,6 +18,7 @@ import variants from "../../../theme/variants";
 import { gql, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import AgendamentoModal from "../../../Modal/AgendamentoModal";
+import { useLocation } from "react-router-dom";
 
 import { useJsApiLoader, GoogleMap, Marker } from "@react-google-maps/api";
 import {
@@ -77,6 +78,7 @@ const center = { lat: 48.8584, lng: 2.2945 };
 
 function Hemocentros() {
   const { theme } = useTheme();
+  const location = useLocation();
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyAoDKmLK4aTcHTTXU-xGp1JC2io7cbreMU",
   });
@@ -84,7 +86,9 @@ function Hemocentros() {
     (variant: any) => variant.name === theme
   );
 
-  const [tipoPesquisa, setTipoPesquisa] = useState("hemocentros");
+  const [tipoPesquisa, setTipoPesquisa] = useState(
+    location.state?.tipoPesquisa || "hemocentros"
+  );
   const [hemocentros, setHemocentros] = useState<Hemocentro[]>([]);
   const [doadores, setDoadores] = useState<Doador[]>([]);
 
@@ -102,6 +106,13 @@ function Hemocentros() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null
   ); // Coordenadas
+
+    // Atualiza o estado quando location.state muda
+    useEffect(() => {
+      if (location.state?.tipoPesquisa) {
+        setTipoPesquisa(location.state.tipoPesquisa);
+      }
+    }, [location.state]);
 
   const [
     CarregarHemocentros,
@@ -258,10 +269,10 @@ function Hemocentros() {
                     width: "100%",
                   }}
                 >
-                  <Typography mb={1} sx={{ color: "lightgrey" }}>
+                  <Typography mb={1} sx={{ color: selectedVariant?.palette.text.main }}>
                     {hemocentro.endereco}
                   </Typography>
-                  <Typography mb={1} sx={{ color: "lightgrey" }}>
+                  <Typography mb={1} sx={{ color: selectedVariant?.palette.text.main }}>
                     {formatPhoneNumber(hemocentro.telefone)}
                   </Typography>
                 </Box>

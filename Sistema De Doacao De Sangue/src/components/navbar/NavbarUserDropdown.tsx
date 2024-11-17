@@ -20,6 +20,7 @@ import styled from "@emotion/styled";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import useTheme from "../hooks/useTheme";
+import Notificacao from "./Notificacao";
 
 const IconButton = styled(MuiIconButton)`
   svg {
@@ -192,6 +193,7 @@ function NavbarUserDropdown() {
 
   return (
     <React.Fragment>
+      <Notificacao aria-haspopup="true" />
       <Tooltip title="Temas">
         <IconButton    
           aria-haspopup="true"
@@ -202,28 +204,7 @@ function NavbarUserDropdown() {
           <PaletteIcon/> 
         </IconButton>
       </Tooltip>
-      <Tooltip title="Conta">
-        <IconButton
-          aria-owns={Boolean(anchorMenu) ? "menu-appbar" : undefined}
-          aria-haspopup="true"
-          onClick={toggleMenu}
-          color="inherit"
-          size="large"
-        >
-          <User />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        id="menu-appbar"
-        anchorEl={anchorMenu}
-        open={Boolean(anchorMenu)}
-        onClose={closeMenu}
-      >
-        {/* Navegar para Perfil */}
-        <MenuItem onClick={()=> navigate("/Perfil")}>Meu Perfil</MenuItem> 
-        <MenuItem onClick={handleSignOut}>Sair</MenuItem>
-        
-      </Menu>
+
       <Drawer anchor="right" open={state.isOpen} onClose={toggleDrawer(false)}>
         <Demos />
       </Drawer>

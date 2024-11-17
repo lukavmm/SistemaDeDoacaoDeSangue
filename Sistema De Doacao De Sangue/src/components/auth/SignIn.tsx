@@ -21,7 +21,7 @@ import { Formik } from "formik";
 import LogoBranca from "/bloodIcon.png";
 import LogoPreta from "/bloodIcon.png";
 import { setCookie } from "nookies";
-import sideImage from "../vendor/loginIcon.jpg";
+import sideImage from "../vendor/DoacaoDeSangue.png";
 import { spacing } from "@mui/system";
 import styled from "@emotion/styled";
 import useAuth from "../hooks/useAuth";
@@ -140,6 +140,7 @@ function SignIn() {
           style={{
             borderRadius: "6px",
             width: "100%",
+            height: "100%",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center center",

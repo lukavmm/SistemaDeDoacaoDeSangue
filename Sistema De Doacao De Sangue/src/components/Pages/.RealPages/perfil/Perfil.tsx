@@ -70,24 +70,24 @@ const Perfil = () => {
       setElegibilidade(canDonate(peso, toDate(dataUltimaDoacao)));
     }, [peso, dataUltimaDoacao]); // Atualiza quando peso ou dataUltimaDoacao mudarem
 
-useEffect(() => {
-  if(data){
-    console.log(data)
-    const perfil = data.getperfil;
-    setUsername(perfil?.username || "Indisponível");
-    setEmail(perfil?.email || "Indisponível");
-    setNomeCompleto(perfil?.nomeCompleto || "Indisponível");
-    setdataNascimento(perfil?.dataNascimento || "Indisponível");
-    settipoSanguineo(perfil?.tipoSanguineo || "Indisponível");
-    setSexo(perfil?.sexo || "Indisponível");
-    setendereco(perfil?.endereco || "Indisponível");
-    settelefone(perfil?.telefone || "Indisponível");
-    setdataUltimaDoacao(perfil?.dataUltimaDoacao || "Indisponível");
-    setcpf(perfil?.cpf || "Indisponível");
-    setnomeHemocentro(perfil?.nomeHemocentro || "Indisponível");
-    setcnpj(perfil?.cpnj || "Indisponível");
-    setdataAtualizacao(perfil?.dataAtualizacao || "Indisponível");
-    setPeso(perfil?.peso || "Indisponível");
+  useEffect(() => {
+    if(data){
+      console.log(data)
+      const perfil = data.getperfil;
+      setUsername(perfil?.username || "Indisponível");
+      setEmail(perfil?.email || "Indisponível");
+      setNomeCompleto(perfil?.nomeCompleto || "Indisponível");
+      setdataNascimento(perfil?.dataNascimento || "Indisponível");
+      settipoSanguineo(perfil?.tipoSanguineo || "Indisponível");
+      setSexo(perfil?.sexo || "Indisponível");
+      setendereco(perfil?.endereco || "Indisponível");
+      settelefone(perfil?.telefone || "Indisponível");
+      setdataUltimaDoacao(perfil?.dataUltimaDoacao || "Indisponível");
+      setcpf(perfil?.cpf || "Indisponível");
+      setnomeHemocentro(perfil?.nomeHemocentro || "Indisponível");
+      setcnpj(perfil?.cpnj || "Indisponível");
+      setdataAtualizacao(perfil?.dataAtualizacao || "Indisponível");
+      setPeso(perfil?.peso || "Indisponível");
   }
 }, [data])
 

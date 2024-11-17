@@ -3,6 +3,8 @@ import { Container, Typography, Grid, Paper, Box, IconButton, Card, CardMedia } 
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import useTheme from "../hooks/useTheme";
 import variants from '../theme/variants';
+import banner1 from "../vendor/banner1.png";
+import banner2 from "../vendor/BannerSD-1.png";
 
 function Parceiros() {
   const { theme } = useTheme();
@@ -11,9 +13,8 @@ function Parceiros() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const images = [
-    'https://wallpapers.com/images/featured/amazon-npcp6jc782ixp9zs.jpg',
-    'https://portal.fiocruz.br/sites/portal.fiocruz.br/files/styles/institucional_nova_-_banners/public/banner/banner_tghn_fiocruz_portal_en_960_x_250_px.png?itok=WfE55_Pz',
-    "https://i.pcmag.com/imagery/articles/03Ab48cEIqQVBraBHaqFBIE-1..v1604347983.jpg",
+    banner1,
+    banner2,
   ];
 
   const handleNext = () => {
@@ -37,10 +38,10 @@ function Parceiros() {
     <Container sx={{ marginBottom: "5%" }}>
     <Box sx={{backgroundColor: selectedVariant?.palette.background.paper, padding: "10px", borderRadius:"5px", marginBottom: "15px"}}>
         <Typography variant="h3">Nossa Missão</Typography>
-        <Typography>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </Typography>
+        <Typography>Pesquisas apontam que apenas 1,8% da população brasileira doa sangue regularmente, embora o ideal para suprir as necessidades do país seja de 3 a 5%. Além disso, quase metade dos doadores doa apenas uma vez. Esse comportamento resulta em estoques inconsistentes e insuficientes, agravando crises de saúde pública, especialmente durante pandemias, feriados prolongados e períodos de maior demanda hospitalar. O sistema de doação será projetado para combater essas barreiras por meio de estratégias inovadoras e centradas no doador, com foco em engajamento contínuo e construção de confiança.</Typography>
     </Box>
         <Typography variant="h3" gutterBottom>Nossos Parceiros</Typography>
-      <Box sx={{ position: 'relative', width: '100%', height: '400px', marginBottom: '20px' }}>
+      <Box sx={{ position: 'relative', width: '100%', height: '90%', marginBottom: '20px' }}>
         <Card sx={{ height: '100%' }}>
           <CardMedia
             component="img"
